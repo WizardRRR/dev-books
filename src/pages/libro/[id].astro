@@ -1,0 +1,91 @@
+---
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+
+  return books.map((book) => ({
+    params: { id: book.slug },
+    props: { book },
+  }));
+}
+
+const { book } = Astro.props;
+const { data } = book;
+const { title, author, img, readtime, description, buy } = data;
+
+const { Content } = await book.render();
+---
+
+<Layout title={`${title} - ${author}`}>
+  <div class="page">
+    <aside>
+      <a href="/">← Volver</a>
+      <Image
+        src={`/books/${img}`}
+        alt={title}
+        width={250}
+        height={350}
+        transition:name={`img-${book.slug}`}
+      />
+    </aside>
+    <main>
+      <h1>{title}</h1>
+      <div class="content">
+        <Content />
+      </div>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 60px;
+    width: min((100% - 20px), 1140px);
+    margin: auto;
+    padding: 60px 0;
+  }
+
+  aside {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    & img {
+      margin: auto;
+    }
+  }
+
+  main {
+    width: min(100%, 700px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    line-height: 1.7rem;
+    text-wrap: pretty;
+  }
+
+  @media (width >= 768px) {
+    .page {
+      flex-direction: row;
+    }
+
+    aside img {
+      margin: 0;
+    }
+  }
+</style>
